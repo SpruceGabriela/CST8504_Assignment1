@@ -1,0 +1,4 @@
+NASA POWER does not provide a complete database for download; the API works through specific queries based on location, time period, and selected parameters.
+Additionally, downloading all available attributes would be inefficient and harmful to the model, since many of them are unrelated to photovoltaic generation and would introduce noise, increasing the risk of overfitting.
+Scientific literature on solar forecasting shows that photovoltaic production depends primarily on irradiance,  temperature, humidity, wind.
+Therefore, I selected only the 6 essential attributes, following best practices in feature selection and ensuring greater efficiency, clarity, and performance of the model.”
