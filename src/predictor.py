@@ -1,5 +1,6 @@
 import joblib
-import pandas as pd
+
+# import pandas as pd - update when get real dataframe data
 
 
 class Predictor:
