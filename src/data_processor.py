@@ -1,5 +1,5 @@
-import requests
 import pandas as pd
+import requests
 
 # Coordinates of the location (example: Ottawa)
 latitude = 45.4215
@@ -7,16 +7,16 @@ longitude = -75.6972
 
 # Period: April to September 2026
 start_date = "20260401"
-end_date   = "20260930"
+end_date = "20260930"
 
 # Climate variables relevant for solar energy production
 parameters = [
-    "ALLSKY_SFC_SW_DWN",   # Solar irradiance (GHI) - Irradiancia solar (GHI)
-    "CLRSKY_SFC_SW_DWN",   # Clear-sky irradiance   - radiacao infravermelha
-    "ALLSKY_SFC_LW_DWN",   # Longwave radiation     - irradiancia em ceu limpo
-    "T2M",                 # Air temperature        - temperatura
-    "RH2M",                # Relative humidity      - umidade
-    "WS10M",               # Wind speed             - vento
+    "ALLSKY_SFC_SW_DWN",  # Solar irradiance (GHI) - Irradiancia solar (GHI)
+    "CLRSKY_SFC_SW_DWN",  # Clear-sky irradiance   - radiacao infravermelha
+    "ALLSKY_SFC_LW_DWN",  # Longwave radiation     - irradiancia em ceu limpo
+    "T2M",  # Air temperature        - temperatura
+    "RH2M",  # Relative humidity      - umidade
+    "WS10M",  # Wind speed             - vento
 ]
 
 # Build the URL
