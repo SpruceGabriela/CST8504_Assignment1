@@ -96,8 +96,8 @@ class RawData:
 
 
 downloader = RawData(
-    latitude=45.4215, # Coordinates of the location (example: Ottawa)
-    longitude=-75.6972,
+    latitude=11.6231, #  Coordinates of the location (example: Seelanaickenpatti Salem, Tamil Nadu, India)
+    longitude=78.1479,
     start_date="20250701", # Period: jul/2025 to jun/2026
     end_date="20260630",
     output_path="data/raw/data_set_raw.csv"
