@@ -60,9 +60,9 @@ class DataProcessor:
     @staticmethod
     def get_season(month):
         if month in [12, 1, 2]: return "winter"
-        elif month in [3, 4, 5]: return "spring"
-        elif month in [6, 7, 8]: return "summer"
-        else: return "fall"
+        elif month in [3, 4, 5]: return "summer"
+        elif month in [6, 7, 8, 9]: return "monsoon" #daily heavy rain 
+        else: return "post_monsoon"
 
     # Outliers detection (IQR method)
     def detect_outliers(self):
@@ -91,13 +91,13 @@ class DataProcessor:
     @staticmethod
     def classify_outlier(row):
         # Real events, not outliers
-        if row["rain"] > 15:
-            return "heavy rain (real)"
-        if row["clouds"] > 95:
-            return "dense clouds (real)"
-        if row["temp"] < -25:
-            return "extreme cold (real)"
-        if row["temp"] > 35:
+        if row["rain"] > 50:
+            return "heavy monsoon rain (real)"
+        if row["clouds"] > 90:
+            return "dense monsoon clouds (real)"
+        if row["temp"] < 5:
+            return "cold wave (real)"
+        if row["temp"] > 40:
             return "extreme hot (real)"
         # Possible sensor errors
         if row["ghi"] < 0.5 and row["clouds"] < 20:
@@ -118,24 +118,49 @@ class DataProcessor:
         # Change the type from Str (True/False) to int (1/0)
         self.df[dummy_cols] = self.df[dummy_cols].astype(int)
         return self
-    
-    def create_ghi_generation(self, area=1.7, efficiency=0.20, PR=0.75):
-        """
-        Estimates PV energy generation using only GHI (no POA).
-        Useful when POA or DHI is unavailable or PVLib causes errors.
-        """
-        # Energy in Wh
-        self.df["energy_ghi"] = self.df["ghi"] * area * efficiency * PR
 
-        # Convert to kWh
-        self.df["energy_ghi_kWh"] = self.df["energy_ghi"] / 1000
+    def load_real_generation(self, kaggle_path):
+        """
+        Loads real solar generation from Kaggle dataset (Daily Generation.xlsx)
+        and prepares it for merging with the NASA dataset.
+        """
+        df_kaggle = pd.read_csv(kaggle_path)
+
+        # Rename columns to match internal naming
+        df_kaggle = df_kaggle.rename(columns={
+            "Date": "date",
+            "Cleaned Energy (kWh)": "label"
+        })
+
+        # Convert date to datetime
+        df_kaggle["date"] = pd.to_datetime(df_kaggle["date"])
+
+        # Store for later merge
+        self.df_kaggle = df_kaggle
 
         return self
 
-    def create_label(self):
-        self.df["label"] = self.df["energy_ghi_kWh"]
+
+    def merge_real_label(self):
+        """
+        Merges real cleaned energy values into the main dataset
+        and replaces the artificial GHI-based label.
+        """
+        # Ensure date is datetime
+        self.df["date"] = pd.to_datetime(self.df["date"])
+
+        # Merge by date
+        self.df = self.df.merge(
+            self.df_kaggle[["date", "label"]],
+            on="date",
+            how="left"
+        )
+
+        # Replace label with real cleaned energy
+       # self.df["label"] = self.df["cleaned_energy"]
+
         return self
-    
+
     # Normalize all numeric features
     def normalize(self):
         # List of numeric features to be normalized
@@ -162,7 +187,7 @@ processor.load_rawdata()\
          .detect_outliers()\
          .remove_errors()\
          .encode_season()\
-         .create_ghi_generation()\
-         .create_label()\
+         .load_real_generation("data/raw/daily_generation.csv")\
+         .merge_real_label()\
          .normalize()\
          .save_csv("data/processed/data_set_prepared.csv")
