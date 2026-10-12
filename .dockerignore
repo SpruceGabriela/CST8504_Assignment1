@@ -1,0 +1,24 @@
+# Version control
+.git
+
+# Python cache and environments
+__pycache__/
+.venv/
+.env
+.ruff_cache/
+
+# Editors
+.idea/
+.vscode/
+
+# Notebooks (exploration only)
+.ipynb_checkpoints/
+notebooks/
+
+# Not needed to run the app
+tests/
+requirements-dev.txt
+
+# The dashboard reads only data/processed/
+data/raw/
+nasa_power_apr_sep_2026.csv
