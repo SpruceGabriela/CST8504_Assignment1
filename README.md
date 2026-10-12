@@ -47,7 +47,6 @@ OR
 2. Install dependencies:
    ```bash
    pip install -r requirements.txt
-   pip install -r requirements-dev.txt   # only for development (Ruff, pytest)
    ```
 3. Run the dashboard:
    ```bash

@@ -17,7 +17,6 @@ notebooks/
 
 # Not needed to run the app
 tests/
-requirements-dev.txt
 
 # The dashboard reads only data/processed/
 data/raw/
