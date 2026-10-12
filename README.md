@@ -29,6 +29,12 @@ Clone the repository:
 Requires Docker Desktop.
 
 ```bash
+docker compose up --build
+```
+
+Or, without Compose:
+
+```bash
 docker build -t solar_dashboard .
 docker run --rm -p 8501:8501 solar_dashboard
 ```
