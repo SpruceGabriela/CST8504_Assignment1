@@ -129,7 +129,7 @@ class DataProcessor:
         # Rename columns to match internal naming
         df_kaggle = df_kaggle.rename(columns={
             "Date": "date",
-            "Cleaned Energy (kWh)": "label"
+            "Cleaned Energy (kWh)": "generated_energy"
         })
 
         # Convert date to datetime
@@ -143,15 +143,14 @@ class DataProcessor:
 
     def merge_real_label(self):
         """
-        Merges real cleaned energy values into the main dataset
-        and replaces the artificial GHI-based label.
+        Merges real cleaned energy values into the main dataset.
         """
         # Ensure date is datetime
         self.df["date"] = pd.to_datetime(self.df["date"])
 
         # Merge by date
         self.df = self.df.merge(
-            self.df_kaggle[["date", "label"]],
+            self.df_kaggle[["date", "generated_energy"]],
             on="date",
             how="left"
         )
