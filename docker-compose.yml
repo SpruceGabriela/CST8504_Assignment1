@@ -1,0 +1,7 @@
+services:
+  dashboard:
+    build: .
+    image: solar_dashboard
+    container_name: dashboard
+    ports:
+      - "8501:8501"
