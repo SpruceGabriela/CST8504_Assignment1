@@ -1,3 +1,4 @@
+import joblib
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -186,6 +187,8 @@ class DataProcessor:
         ]
         scaler = MinMaxScaler()
         self.df[cols_to_scale] = scaler.fit_transform(self.df[cols_to_scale])
+        joblib.dump(scaler, "models/scaler.pkl")
+
         return self
 
     def split_data(self, label_col="generated_energy", seed=42):
@@ -251,10 +254,11 @@ class DataProcessor:
         return self
 
 
-processor = DataProcessor("data/raw/data_set_raw.csv")
+if __name__ == "__main__":
+    processor = DataProcessor("data/raw/data_set_raw.csv")
 
-processor.load_rawdata().rename_features().format_date().remove_duplicates().generate_id().replace_missing().create_features().detect_outliers().remove_errors().encode_season().load_real_generation(
-    "data/raw/daily_generation.csv"
-).merge_real_label().normalize().split_data().save_splits().save_csv(
-    "data/processed/data_set_prepared.csv"
-)
+    processor.load_rawdata().rename_features().format_date().remove_duplicates().generate_id().replace_missing().create_features().detect_outliers().remove_errors().encode_season().load_real_generation(
+        "data/raw/daily_generation.csv"
+    ).merge_real_label().normalize().split_data().save_splits().save_csv(
+        "data/processed/data_set_prepared.csv"
+    )
