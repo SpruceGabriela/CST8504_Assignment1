@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.model_selection import train_test_split
 
 class DataProcessor:
 
@@ -129,7 +130,7 @@ class DataProcessor:
         # Rename columns to match internal naming
         df_kaggle = df_kaggle.rename(columns={
             "Date": "date",
-            "Cleaned Energy (kWh)": "label"
+            "Cleaned Energy (kWh)": "generated_energy"
         })
 
         # Convert date to datetime
@@ -143,15 +144,14 @@ class DataProcessor:
 
     def merge_real_label(self):
         """
-        Merges real cleaned energy values into the main dataset
-        and replaces the artificial GHI-based label.
+        Merges real cleaned energy values into the main dataset.
         """
         # Ensure date is datetime
         self.df["date"] = pd.to_datetime(self.df["date"])
 
         # Merge by date
         self.df = self.df.merge(
-            self.df_kaggle[["date", "label"]],
+            self.df_kaggle[["date", "generated_energy"]],
             on="date",
             how="left"
         )
@@ -169,8 +169,55 @@ class DataProcessor:
         scaler = MinMaxScaler()
         self.df[cols_to_scale] = scaler.fit_transform(self.df[cols_to_scale])
         return self
+
+    def split_data(self, label_col="generated_energy", seed=42):
+        """
+        Splits the dataset into train (70%), validation (15%), and test (15%)
+        using a fixed random seed for reproducibility.
+        """
+
+        # Separate features and label
+        X = self.df.drop(columns=[label_col])
+        y = self.df[label_col]
+
+        # Train (70%) + Temp (30%)
+        X_train, X_temp, y_train, y_temp = train_test_split(
+            X, y, test_size=0.30, random_state=seed # division of data_set will be always the same, will not generate diferent splits
+        )
+
+        # Validation (15%) + Test (15%)
+        X_val, X_test, y_val, y_test = train_test_split(
+            X_temp, y_temp, test_size=0.50, random_state=seed
+        )
+
+        # Store splits inside the object
+        self.X_train = X_train
+        self.X_val = X_val
+        self.X_test = X_test
+        self.y_train = y_train
+        self.y_val = y_val
+        self.y_test = y_test
+
+        return self
+
+    def save_splits(self, output_dir="data/processed"):
+        """
+        Saves train, validation and test splits as separate CSV files.
+        Requires split_data() to be executed first.
+        """
+
+        # Ensure directory exists
+        import os
+        os.makedirs(output_dir, exist_ok=True)
+
+        # Save each split
+        self.X_train.assign(label=self.y_train).to_csv(f"{output_dir}/train.csv", index=False)
+        self.X_val.assign(label=self.y_val).to_csv(f"{output_dir}/validation.csv", index=False)
+        self.X_test.assign(label=self.y_test).to_csv(f"{output_dir}/test.csv", index=False)
+
+        return self
     
-    # Create csv documento with prepared dataset
+    # Create csv documento with prepared dataset (whole data set withou splits)
     def save_csv(self, output_path):
         self.df.to_csv(output_path, index=False)
         return self
@@ -190,4 +237,6 @@ processor.load_rawdata()\
          .load_real_generation("data/raw/daily_generation.csv")\
          .merge_real_label()\
          .normalize()\
+         .split_data()\
+         .save_splits()\
          .save_csv("data/processed/data_set_prepared.csv")
