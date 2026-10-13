@@ -3,7 +3,7 @@ import joblib
 
 class Predictor:
     def __init__(
-        self, model_path="models/best_model.pkl", scaler_path="models/scaler.pkl"
+        self, model_path="models/linear_regression.pkl", scaler_path="models/scaler.pkl"
     ):
         """
         Loads the trained model and scaler from their paths.
