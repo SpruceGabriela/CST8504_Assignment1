@@ -1,9 +1,12 @@
 import joblib
+import pandas as pd
+
+from src.data_processor import DataProcessor
 
 
 class Predictor:
     def __init__(
-        self, model_path="models/best_model.pkl", scaler_path="models/scaler.pkl"
+        self, model_path="models/linear_regression.pkl", scaler_path="models/scaler.pkl"
     ):
         """
         Loads the trained model and scaler from their paths.
@@ -55,3 +58,50 @@ class Predictor:
         if predicted_kwh < 0:
             return 0.0
         return float(predicted_kwh)
+
+    # Used by the dashboard prediction page: it will receive the raw values typed by the user.
+    # The assignment PDF warns that the input from the dashboard has
+    # to go through exactly the same preprocessing as your training data, or the predictions
+    # will be nonsense. The dashboard just calls this method and shows the result.
+    def predict_from_inputs(
+        self, ghi, ghi_clear, temp, humidity, wind, clouds, rain, date
+    ):
+        """
+        Predicts the daily energy generation from the raw values typed in the dashboard.
+        ghi, ghi_clear: kWh/m²/day | temp: °C | humidity, clouds: % | wind: m/s | rain: mm/day
+        date: the day to predict, e.g. "2026-03-15" or a datetime.date
+        Returns: predicted energy in kWh, never negative.
+        """
+
+        # ghi_clear must be greater than 0 to avoid division by zero when calculating ghi_clear_ratio
+        if ghi_clear <= 0:
+            raise ValueError("ghi_clear must be greater than 0.")
+
+        date = pd.to_datetime(date)
+
+        # Same derived features as DataProcessor.create_features()
+        input_data = pd.DataFrame(
+            [
+                {
+                    "ghi": ghi,
+                    "ghi_clear": ghi_clear,
+                    "temp": temp,
+                    "humidity": humidity,
+                    "wind": wind,
+                    "clouds": clouds,
+                    "rain": rain,
+                    "ghi_clear_ratio": ghi / ghi_clear,
+                    "day_of_year": date.dayofyear,
+                    "month": date.month,
+                }
+            ]
+        )
+
+        # Season one-hot columns, as in DataProcessor.encode_season():
+        # 1 for the season of this date, 0 for the others
+        season = DataProcessor.get_season(date.month)
+        for column in self.model.feature_names_in_:
+            if column.startswith("s_"):
+                input_data[column] = int(column == f"s_{season}")
+
+        return self.predict(input_data)
