@@ -1,6 +1,6 @@
 # CST8504 Assignment 1 Prediction Dashboard
 
-End-to-end machine learning project for CST8504 Assignment 1. It predicts the **daily energy generation (kWh)** of a solar plant in Salem, Tamil Nadu (India), from daily weather data. It includes a data cleaning pipeline, regression models compared on the same test set, and a Streamlit dashboard for exploring the data and making live predictions, all packaged with Docker.
+End-to-end machine learning project for CST8504 Assignment 1. It predicts the **daily energy generation (kWh)** of a solar plant in Salem, Tamil Nadu (India), from daily weather data. It includes a data cleaning pipeline, a Linear Regression model evaluated on a held-out test set, and a Streamlit dashboard for exploring the data and making live predictions, all packaged with Docker.
 
 Repository: https://github.com/SpruceGabriela/CST8504_Assignment1
 
@@ -59,6 +59,25 @@ OR
    streamlit run app/dashboard.py
    ```
 
+## 🧠 Rebuild the data and train the model
+The processed data and the trained model are already in the repository, so this is only needed if the data pipeline changes.
+
+1. Clean the raw data, split it (70/15/15) and save the scaler:
+   ```bash
+   python src/data_processor.py
+   ```
+   Creates `data/processed/train.csv`, `validation.csv`, `test.csv` and `models/scaler.pkl`.
+
+2. Train and evaluate the Linear Regression:
+   ```bash
+   python src/model_trainer.py
+   ```
+   Creates in `models/`:
+   - `linear_regression.pkl`: the trained model, used by the Prediction page
+   - `model_metrics.csv`, `test_predictions.csv`, `coefficients.csv`: used by the Model Performance page
+
+Run both commands from the project root. If the data pipeline changes, run both again, so the scaler and the model stay in sync.
+
 ---
 
 ## 📌 Freezing Dependencies
@@ -83,6 +102,17 @@ ruff check .
 ```  
 ruff format .
 ```
+
+---
+
+## ✅ Running Tests
+
+From the project root:
+```bash
+python -m pytest -v
+```
+Use `python -m pytest` (not just `pytest`), so the imports from `src/` work.
+The tests check that the trainer runs end to end and that the Predictor returns a valid kWh value and raises clear errors for bad input.
 
 ---
 
