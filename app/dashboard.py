@@ -66,7 +66,7 @@ class Dashboard:
         )
 
         df = load_raw_data()
-
+    
         # Top-level metrics
         col1, col2, col3, col4 = st.columns(4)
         col1.metric("Total Instances", f"{df.shape[0]:,}")
@@ -170,8 +170,8 @@ class Dashboard:
         if page == "📊 Data Overview":
             self.page_overview()
 
-       # elif page == "🔍 Interactive Exploration":
-       #     self.page_exploration()
+        # elif page == "🔍 Interactive Exploration":
+        #     self.page_exploration()
 
        # elif page == "🔮 Prediction":
        #     self.page_prediction()
