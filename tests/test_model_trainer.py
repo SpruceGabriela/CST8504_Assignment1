@@ -3,6 +3,8 @@ import pytest
 
 from src.model_trainer import ModelTrainer
 
+# I already knew the concept of testing, but for python was new, I learned reading a Medium article, following the steps
+
 # Fake dataset to use in the test cases
 MOCK_DAYS = pd.DataFrame(
     {
