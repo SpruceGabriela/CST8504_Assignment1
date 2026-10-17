@@ -6,7 +6,7 @@ from sklearn.preprocessing import MinMaxScaler
 
 
 class DataProcessor:
-    def __init__(self, filepath):
+    def __init__(self, filepath=None):
         self.filepath = filepath
         self.df = None
         self.errors = None
@@ -20,7 +20,6 @@ class DataProcessor:
             columns={
                 "ALLSKY_SFC_SW_DWN": "ghi",
                 "CLRSKY_SFC_SW_DWN": "ghi_clear",
-                "ALLSKY_SFC_SW_DNI": "dni",
                 "T2M": "temp",
                 "RH2M": "humidity",
                 "WS10M": "wind",
@@ -29,6 +28,19 @@ class DataProcessor:
             }
         )
         return self
+
+    def rename_features_df(self, df):
+        return df.rename(
+        columns={
+            "ALLSKY_SFC_SW_DWN": "ghi",
+            "CLRSKY_SFC_SW_DWN": "ghi_clear",
+            "T2M": "temp",
+            "RH2M": "humidity",
+            "WS10M": "wind",
+            "CLOUD_AMT": "clouds",
+            "PRECTOTCORR": "rain",
+        }
+    )
 
     def format_date(self):
         self.df["date"] = pd.to_datetime(self.df["date"], format="%Y%m%d")
@@ -60,6 +72,29 @@ class DataProcessor:
         self.df["month"] = self.df["date"].dt.month
         self.df["season"] = self.df["month"].apply(self.get_season)
         return self
+
+    def create_features_df(self, df):
+        df["ghi_clear_ratio"] = df["ghi"] / df["ghi_clear"]
+        df["day_of_year"] = df["date"].dt.dayofyear
+        df["month"] = df["date"].dt.month
+        df["season"] = df["month"].apply(self.get_season)
+        return df
+
+    def encode_season_df(self, df): #to use in the dashboard (create seasons with value 0)
+        # Create dummies
+        dummies = pd.get_dummies(df["season"], prefix="s")
+
+        # Make sure all features will be created
+        for col in ["s_winter", "s_summer", "s_monsoon", "s_post_monsoon"]:
+            if col not in dummies.columns:
+                dummies[col] = 0
+
+        # sort seasons
+        dummies = dummies[["s_winter", "s_summer", "s_monsoon", "s_post_monsoon"]]
+
+        # Concatenate
+        df = pd.concat([df, dummies], axis=1)
+        return df
 
     @staticmethod
     def get_season(month):
