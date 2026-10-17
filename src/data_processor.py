@@ -31,16 +31,16 @@ class DataProcessor:
 
     def rename_features_df(self, df):
         return df.rename(
-        columns={
-            "ALLSKY_SFC_SW_DWN": "ghi",
-            "CLRSKY_SFC_SW_DWN": "ghi_clear",
-            "T2M": "temp",
-            "RH2M": "humidity",
-            "WS10M": "wind",
-            "CLOUD_AMT": "clouds",
-            "PRECTOTCORR": "rain",
-        }
-    )
+            columns={
+                "ALLSKY_SFC_SW_DWN": "ghi",
+                "CLRSKY_SFC_SW_DWN": "ghi_clear",
+                "T2M": "temp",
+                "RH2M": "humidity",
+                "WS10M": "wind",
+                "CLOUD_AMT": "clouds",
+                "PRECTOTCORR": "rain",
+            }
+        )
 
     def format_date(self):
         self.df["date"] = pd.to_datetime(self.df["date"], format="%Y%m%d")
@@ -80,7 +80,9 @@ class DataProcessor:
         df["season"] = df["month"].apply(self.get_season)
         return df
 
-    def encode_season_df(self, df): #to use in the dashboard (create seasons with value 0)
+    def encode_season_df(
+        self, df
+    ):  # to use in the dashboard (create seasons with value 0)
         # Create dummies
         dummies = pd.get_dummies(df["season"], prefix="s")
 

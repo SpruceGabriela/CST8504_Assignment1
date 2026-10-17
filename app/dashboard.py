@@ -4,7 +4,6 @@ import plotly.express as px
 import sys
 import os
 import plotly.graph_objects as go
-import plotly.express as px
 
 # ------------------------------------------------------------
 # Ensure Python can find the src/ package
@@ -14,6 +13,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from src.predictor import Predictor
 from src.data_processor import DataProcessor
+
 
 # ============================================================
 # MAIN DASHBOARD CLASS (OOP)
@@ -44,7 +44,7 @@ class Dashboard:
             "RH2M": "Humidity (%)",
             "WS10M": "Wind (m/s)",
             "CLOUD_AMT": "Cloud (%)",
-            "PRECTOTCORR": "Precipitation Corrected (mm/day)"
+            "PRECTOTCORR": "Precipitation Corrected (mm/day)",
         }
 
         # Create Data processor to use on inference
@@ -54,11 +54,25 @@ class Dashboard:
     # PAGE 1 — DATA OVERVIEW
     # ============================================================
     def page_data_overview(self):
+        """Draws the Data Overview page.
+        The dashboard only needs to call this method."""
         st.header("📊 Data Overview")
 
+        self.raw_nasa_overview()
+        self.raw_nasa_preview()
+        self.raw_nasa_stats()
+        self.raw_generation_overview()
+        self.raw_generation_preview()
+        self.train_preview()
+        self.dataset_size()
+
+    def raw_nasa_overview(self):
+        """Explore the Raw Nasa Power data set.
+        - Details about the Dataset
+        """
         st.subheader("🌤️ Raw NASA POWER Dataset Overview")
         st.markdown(
-        f"""
+            f"""
         - **Location:** Tamil Nadu, India  
         - **Date Range:** 2025-07-01 → 2026-06-30  
         - **Number of Features:** 8  
@@ -70,7 +84,10 @@ class Dashboard:
         """
         )
 
-        # Raw Nasa Power Data Set visualization with start and stop box
+    def raw_nasa_preview(self):
+        """
+        Raw Nasa Power Data Set visualization with start and end row box
+        """
         col1, col2, col3 = st.columns([1, 1, 7])  # both columns small
         with col1:
             start = st.number_input(
@@ -86,24 +103,31 @@ class Dashboard:
             )
         st.dataframe(self.raw.iloc[start:end])
 
-        # Summary statistics of raw data
+    def raw_nasa_stats(self):
+        """
+        Summary statistis of the raw Nasa Power Dataset
+        """
         st.subheader("Summary Statistics of Raw NASA POWER Data")
 
         # Summary statistics
         raw_summary = self.raw.describe().transpose()
 
-        # Renomear as features usando o dicionário de labels
+        # Rename features using labels dictionary
         raw_summary.index = [
-            self.feature_labels.get(col, col)
-            for col in raw_summary.index
+            self.feature_labels.get(col, col) for col in raw_summary.index
         ]
 
-        # Mostrar no dashboard
+        # Show in dashboard
         st.dataframe(raw_summary, use_container_width=True)
 
+    def raw_generation_overview(self):
+        """
+        Explore the Raw Daily Generation data set.
+        - Details about the Dataset
+        """
         st.markdown(
-        f"""
-        ### 📍 Raw Daily Generation Dataset Details
+            f"""
+        ### 📍 Raw Daily Generation Dataset Overview
         - **Location:** Tamil Nadu, India  
         - **Date Range:** 2024-11-24 → 2026-09-15
         - **Number of Features:** 4 
@@ -114,6 +138,10 @@ class Dashboard:
         """
         )
 
+    def raw_generation_preview(self):
+        """
+        Raw Daily Generation Data Set visualization with start and end row box
+        """
         st.subheader("Raw Daily Generation Data Preview")
         col11, col12, col13 = st.columns([1, 1, 7])  # both columns small
         with col11:
@@ -130,6 +158,10 @@ class Dashboard:
             )
         st.dataframe(self.raw2.iloc[start1:end1])
 
+    def train_preview(self):
+        """
+        Training Data Set visualization with start and end row box
+        """
         st.subheader("📘 Training Data Preview (Prepared Data)")
         col111, col112, col113 = st.columns([1, 1, 5])  # both columns small
         with col111:
@@ -146,8 +178,13 @@ class Dashboard:
             )
         st.dataframe(self.train.iloc[start2:end2])
 
+    def dataset_size(self):
+        """
+        Describe datasets size.
+        """
+
         st.subheader("📏 Datasets Size:")
-        col1, col2, _ = st.columns([2,2,3])
+        col1, col2, _ = st.columns([2, 2, 3])
 
         with col1:
             st.markdown(f"""
@@ -166,16 +203,25 @@ class Dashboard:
     # PAGE 2 — INTERACTIVE EXPLORATION
     # ============================================================
     def page_exploration(self):
+        """Draws the exploration page.
+        The dashboard only needs to call this method."""
         st.header("🔍 Interactive Exploration")
+        st.markdown(
+            "Choose the dates and a feature to visualize its behavior on all graphics below."
+        )
 
-        # --------------------------
-        # MAIN LINE CHART
-        # --------------------------
-        st.markdown("Choose the dates and a feature to visualize its behavior on all graphics below.")
-        
+        self.exploration_options()
+        self.overtime()
+        self.rolling_mean()
+        self.scatter()
+
+    def exploration_options(self):
+        """
+        Builds option selector. Ensures the user selects a date range and a feature, and then displays all charts based on those inputs.
+        """
         # Use RAW dataset
         df = self.raw.copy()
-        
+
         # Convert date column if it exists
         if "date" in df.columns:
             df["date"] = pd.to_datetime(df["date"], format="%Y%m%d")
@@ -184,27 +230,23 @@ class Dashboard:
             min_date = df["date"].min()
             max_date = df["date"].max()
 
-            col_date1, col_date2, col_3, _= st.columns([1,1,2,2])
+            col_date1, col_date2, col_3, _ = st.columns([1, 1, 2, 2])
 
             with col_date1:
                 start_date = st.date_input(
-                    "Start date",
-                    value=min_date,
-                    min_value=min_date,
-                    max_value=max_date
+                    "Start date", value=min_date, min_value=min_date, max_value=max_date
                 )
 
             with col_date2:
                 end_date = st.date_input(
-                    "End date",
-                    value=max_date,
-                    min_value=min_date,
-                    max_value=max_date
+                    "End date", value=max_date, min_value=min_date, max_value=max_date
                 )
 
             # Filter dataframe by user-selected range
-            df = df[(df["date"] >= pd.to_datetime(start_date)) &
-                    (df["date"] <= pd.to_datetime(end_date))]
+            df = df[
+                (df["date"] >= pd.to_datetime(start_date))
+                & (df["date"] <= pd.to_datetime(end_date))
+            ]
 
             # Avoid empty chart
             if df.empty:
@@ -212,86 +254,96 @@ class Dashboard:
                 return
 
             with col_3:
-
                 # Remove "date" from labels list
                 labels_without_date = {
-                    key: value for key, value in self.feature_labels.items() if key != "date"
+                    key: value
+                    for key, value in self.feature_labels.items()
+                    if key != "date"
                 }
 
                 feature_label = st.selectbox(
-                    "Select a feature:",
-                    list(labels_without_date.values())
+                    "Select a feature:", list(labels_without_date.values())
                 )
-        
+
         # Find the corresponding raw column name
         feature = [k for k, v in self.feature_labels.items() if v == feature_label][0]
-        
-        # --------------------------
-        # FEATURE OVERTIME - LINE CHART
-        # --------------------------
+
+        # Save for other methods
+        self.df = df
+        self.feature = feature
+        self.feature_label = feature_label
+
+    def overtime(self):
+        """
+        Plot atime-series visualization (Line Chart)
+        """
         st.markdown("### Feature Overtime")
         # Line chart
-        if "date" in df.columns:
+        if "date" in self.df.columns:
             fig = px.line(
-                df,
+                self.df,
                 x="date",
-                y=feature,
-                title=f"{feature_label} Over Time",
+                y=self.feature,
+                title=f"{self.feature_label} Over Time",
                 markers=True,
                 labels={
-                    "date": "Date",          # Rename axis X
-                    feature: feature_label   # Rename axis Y
-                }
+                    "date": "Date",  # Rename axis X
+                    self.feature: self.feature_label,  # Rename axis Y
+                },
             )
             st.plotly_chart(fig, use_container_width=True)
-        
-        # --------------------------
-        # ROLLING MEAN CHART
-        # --------------------------
-        st.subheader("Rolling Mean")
 
-        window = st.slider(
-            "Select rolling window (days):",
-            min_value=3,
-            max_value=60,
-            value=14
-        )
+    def rolling_mean(self):
+        """
+        Plots the rolling mean of the selected feature.
+        Allows the user to choose a rolling window (3–60 days),
+        and visualizes the smoothed trend to highlight medium‑term behavior.
+        """
+        st.subheader("Smoothed Trend (Rolling Mean)")
 
-        df["rolling"] = df[feature].rolling(window=window).mean()
+        window = st.slider("Select rolling window (days):", 3, 60, 14)
+
+        self.df["rolling"] = self.df[self.feature].rolling(window=window).mean()
 
         fig2 = px.line(
-            df,
+            self.df,
             x="date",
             y="rolling",
-            title=f"{feature_label} - {window}-day Rolling Mean",
+            title=f"{self.feature_label} - {window}-day Rolling Mean",
             markers=False,
-            labels={"date": "Date", "rolling": f"{feature_label} (Rolling Mean)"}
+            labels={"date": "Date", "rolling": f"{self.feature_label} (Rolling Mean)"},
         )
         st.plotly_chart(fig2, use_container_width=True)
 
-        # --------------------------
-        # SCATTER WITH TRENDLINE
-        # --------------------------
-        st.subheader("Scatter with Trendline")
+    def scatter(self):
+        """
+        Shows a scatter plot with a LOWESS trendline.
+        Helps identify patterns, noise, and non‑linear relationships in the selected feature over time.
+        The trendline is styled in red for emphasis.
+        """
+        st.subheader("Feature Trend & Variability")
         fig3 = px.scatter(
-            df,
+            self.df,
             x="date",
-            y=feature,
+            y=self.feature,
             trendline="lowess",
-            title=f"{feature_label} Scatter with Trendline",
-            labels={"date": "Date", feature: feature_label}
+            title=f"{self.feature_label} Scatter with Trendline",
+            labels={"date": "Date", self.feature: self.feature_label},
         )
 
         # Make the trendline red
-        fig3.update_traces(selector=dict(mode="lines"), line=dict(color="red", width=3))
+        fig3.update_traces(selector=dict(mode="lines"), line=dict(color="red", width=2))
 
         st.plotly_chart(fig3, use_container_width=True)
 
     # ============================================================
     # PAGE 3 — PREDICTION
-    # ============================================================  
-        
+    # ============================================================
+
     def page_prediction(self):
+        """
+        Interactive module for predicting daily solar energy output based on model and user inputs.
+        """
 
         st.header("⚡ Energy Prediction")
         st.subheader("""
@@ -301,6 +353,10 @@ class Dashboard:
             Adjust the input features below to generate a prediction:
             """)
 
+        self.user_inputs()
+        self.user_prediction()
+
+    def user_inputs(self):
         # Load RAW dataset (needed for dtypes and default values)
         df_raw = self.raw.copy()
 
@@ -315,14 +371,10 @@ class Dashboard:
 
         i = 0  # column rotation counter
 
-        four_decimal_fields = [
-            "ALLSKY_SFC_SW_DWN",
-            "CLRSKY_SFC_SW_DWN"
-        ]
+        four_decimal_fields = ["ALLSKY_SFC_SW_DWN", "CLRSKY_SFC_SW_DWN"]
 
         # Create inputs based on RAW dataset
         for col in raw_cols:
-
             current_col = cols[i % 4]
             i += 1
 
@@ -339,7 +391,7 @@ class Dashboard:
             if df_raw[col].dtype != "object":
                 default_value = float(df_raw[col].mean())
 
-                # Set the decimal 
+                # Set the decimal
                 if col in four_decimal_fields:
                     fmt = "%.4f"
                 else:
@@ -347,9 +399,7 @@ class Dashboard:
 
                 with current_col:
                     input_dict[col] = st.number_input(
-                        label,
-                        value=default_value,
-                        format=fmt
+                        label, value=default_value, format=fmt
                     )
 
         # Convert dict → DataFrame
@@ -358,20 +408,25 @@ class Dashboard:
         # Convert date to datetime
         input_df["date"] = pd.to_datetime(input_df["date"])
 
+        # Save for other methods
+        self.input_df = input_df
+
+    def user_prediction(self):
+
         # Rename RAW → model columns
-        input_df = self.data_processor.rename_features_df(input_df)
+        self.input_df = self.data_processor.rename_features_df(self.input_df)
 
         # Create derived features (same logic as training)
-        input_df = self.data_processor.create_features_df(input_df)
+        self.input_df = self.data_processor.create_features_df(self.input_df)
 
         # Create seasons (same logic as training)
-        input_df = self.data_processor.encode_season_df(input_df)
+        self.input_df = self.data_processor.encode_season_df(self.input_df)
 
         # Ensure model receives exactly the columns it expects
-        final_df = input_df[self.predictor.model.feature_names_in_]
+        final_df = self.input_df[self.predictor.model.feature_names_in_]
 
         # Predict
-        col_btn, col_result, _= st.columns([1, 2, 11])
+        col_btn, col_result, _ = st.columns([1, 2, 11])
 
         with col_btn:
             predict_clicked = st.button("Predict")
@@ -380,45 +435,51 @@ class Dashboard:
             if predict_clicked:
                 pred = self.predictor.predict(final_df)
                 st.success(f"Predicted Energy: {pred:.2f} kWh")
-                
+
         # GRAPHIC FOR PREDICT VALUE
         if predict_clicked:
-
-            max_value = self.prepared["generated_energy"].max() * 1.5 #set the max value = data_set_prepared - generated_energy + 50%
-            _, col_graph, _= st.columns([1, 2, 11])
+            # set the max value = data_set_prepared - generated_energy + 50%
+            max_value = self.prepared["generated_energy"].max() * 1.5
+            _, col_graph, _ = st.columns([1, 2, 11])
 
             with col_graph:
-                figA = go.Figure(go.Indicator(
-                    mode = "gauge+number",
-                    value = pred,
-                    gauge = {
-                        "axis": {"range": [0, max_value]},
-                        "bar": {"color": "orange"},
-                        "steps": [
-                            {"range": [0, max_value*0.5], "color": "#d0e1f9"},
-                            {"range": [max_value*0.5, max_value], "color": "#a8c4f0"}
-                        ]
-                    }
-                ))
+                figA = go.Figure(
+                    go.Indicator(
+                        mode="gauge+number",
+                        value=pred,
+                        gauge={
+                            "axis": {"range": [0, max_value]},
+                            "bar": {"color": "orange"},
+                            "steps": [
+                                {"range": [0, max_value * 0.5], "color": "#d0e1f9"},
+                                {
+                                    "range": [max_value * 0.5, max_value],
+                                    "color": "#a8c4f0",
+                                },
+                            ],
+                        },
+                    )
+                )
 
                 figA.update_layout(
-                    height=150,   # graph height
-                    width=150,    # graph width
-                    margin=dict(l=10, r=10, t=10, b=10)  # opcional: margin
+                    height=150,  # graph height
+                    width=150,  # graph width
+                    margin=dict(l=10, r=10, t=10, b=10),  # opcional: margin
                 )
 
                 st.plotly_chart(figA, use_container_width=True)
-    
+
     # ============================================================
     # MAIN NAVIGATION
     # ============================================================
     def run(self):
-        st.set_page_config(layout="wide") 
+        st.set_page_config(layout="wide")
 
         st.title("🔆 Solar Energy Production Dashboard")
 
         # 🔧 CSS for navbar on top of the page
-        st.markdown("""
+        st.markdown(
+            """
         <style>
         /* Navbar fixa */
         div[data-testid="stRadio"] {
@@ -445,22 +506,29 @@ class Dashboard:
             padding-right: 2rem !important;
         }
         </style>
-        """, unsafe_allow_html=True)
-
-        #Top Menu
-        menu = st.radio(
-            "",
-            ["📊 Data Overview", "🔍 Interactive Exploration", "⚡ Prediction", "📉 Model Performance"],
-            horizontal=True
+        """,
+            unsafe_allow_html=True,
         )
 
-      #  st.markdown("---")
+        # Top Menu
+        menu = st.radio(
+            "",
+            [
+                "📊 Data Overview",
+                "🔍 Interactive Exploration",
+                "⚡ Prediction",
+                "📉 Model Performance",
+            ],
+            horizontal=True,
+        )
+
+        #  st.markdown("---")
 
         # Menu
         if menu == "📊 Data Overview":
             self.page_data_overview()
         elif menu == "🔍 Interactive Exploration":
-             self.page_exploration()
+            self.page_exploration()
         elif menu == "⚡ Prediction":
             self.page_prediction()
         elif menu == "📉 Model Performance":
