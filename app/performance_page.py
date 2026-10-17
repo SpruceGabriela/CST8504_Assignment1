@@ -38,7 +38,8 @@ class PerformancePage:
         )
 
     def show_predicted_vs_actual(self):
-        """Scatter plot: actual kWh (x) vs predicted kWh (y), with the y = x line."""
+        """Line chart: actual and predicted kWh for each test day, in date order."""
+
         st.subheader("🎯 Predicted vs Actual")
 
         predictions = self.predictions.sort_values("date")
@@ -60,9 +61,8 @@ class PerformancePage:
 
         st.plotly_chart(fig)
         st.caption(
-            "Each dot is one day the model had never seen. If the prediction was perfect, the dot sits "
-            "on the dashed line. Dots below the line are days the model expected more energy than the plant "
-            "actually produced."
+            "Turquoise is the real energy and pink is the model's prediction, for days the model never saw. "
+            "The closer the lines, the better. Big gaps are days the plant produced less than expected."
         )
 
     def show_residuals(self):

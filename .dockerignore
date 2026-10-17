@@ -18,6 +18,4 @@ notebooks/
 # Not needed to run the app
 tests/
 
-# The dashboard reads only data/processed/
-data/raw/
 nasa_power_apr_sep_2026.csv
