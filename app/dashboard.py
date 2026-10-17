@@ -408,16 +408,6 @@ class Dashboard:
                 )
 
                 st.plotly_chart(figA, use_container_width=True)
-
-            # grafico 2 ==============================
-            figB = px.bar(
-                x=["Predicted Energy"],
-                y=[pred],
-                color=[pred],
-                color_continuous_scale="sunset",
-                labels={"y": "kWh"}
-            )
-            st.plotly_chart(figB, use_container_width=True)
     
     # ============================================================
     # MAIN NAVIGATION
