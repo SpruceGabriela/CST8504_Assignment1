@@ -45,14 +45,17 @@ class PerformancePage:
 
         fig = px.line(
             predictions,
-            x="actual",
+            x="date",
             y=["actual", "predicted"],
+            markers=True,
             hover_data=["date"],
             labels={
-                "actual": "Actual energy (kWh)",
-                "predicted": "Predicted energy (kWh)",
+                "date": "Date",
+                "value": "Energy (kWh)",
+                "variable": "",
             },
             title="Predicted vs actual energy (test set)",
+            color_discrete_map={"actual": "#1ABC9C", "predicted": "#D2457D"},
         )
 
         st.plotly_chart(fig)
