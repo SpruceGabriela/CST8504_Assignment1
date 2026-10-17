@@ -19,7 +19,7 @@ def test_prediction_is_not_negative():
     predictor = Predictor()
 
     kwh = predictor.predict_from_inputs(**MOCK_DAY)
-    assert type(kwh) == float
+    assert isinstance(kwh, float)
     assert kwh >= 0
 
 

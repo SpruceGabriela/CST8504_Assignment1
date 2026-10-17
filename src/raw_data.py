@@ -1,6 +1,7 @@
 import requests
 import pandas as pd
 
+
 class RawData:
     """
     Downloads daily solar and climate data from NASA POWER API
@@ -11,16 +12,16 @@ class RawData:
         self.latitude = latitude
         self.longitude = longitude
         self.start_date = start_date  # format: YYYYMMDD
-        self.end_date = end_date      # format: YYYYMMDD
+        self.end_date = end_date  # format: YYYYMMDD
         self.output_path = output_path
         self.parameters = [
-            "ALLSKY_SFC_SW_DWN",    # GHI - Global Horizontal Irradiance
-            "CLRSKY_SFC_SW_DWN",    # Clear-sky GHI
-            "T2M",                  # Air temperature
-            "RH2M",                 # Relative humidity
-            "WS10M",                # Wind speed
-            "CLOUD_AMT",            # Clouds
-            "PRECTOTCORR"           # Total precipitation
+            "ALLSKY_SFC_SW_DWN",  # GHI - Global Horizontal Irradiance
+            "CLRSKY_SFC_SW_DWN",  # Clear-sky GHI
+            "T2M",  # Air temperature
+            "RH2M",  # Relative humidity
+            "WS10M",  # Wind speed
+            "CLOUD_AMT",  # Clouds
+            "PRECTOTCORR",  # Total precipitation
         ]
         self.df = None
 
@@ -42,9 +43,8 @@ class RawData:
             "&format=JSON"
         )
 
-        
         return url
-    
+
     def download(self):
         """
         Downloads data from NASA POWER and stores raw JSON.
@@ -56,16 +56,16 @@ class RawData:
         response.raise_for_status()
         data = response.json()
         return data
-    
+
     def to_dataframe(self, data):
         """
         Converts NASA POWER JSON response into a pandas DataFrame.
         """
 
-        records = data["properties"]["parameter"] # Extract the climate records
+        records = data["properties"]["parameter"]  # Extract the climate records
 
-        df = pd.DataFrame() # Create the DataFrame
-        for var in self.parameters: # Add each variable as a column
+        df = pd.DataFrame()  # Create the DataFrame
+        for var in self.parameters:  # Add each variable as a column
             df[var] = pd.Series(records[var])
 
         # Convert index (dates) into a column
@@ -80,7 +80,7 @@ class RawData:
 
         if self.df is None:
             raise ValueError("DataFrame is empty. Call to_dataframe() first.")
-        self.df.to_csv(self.output_path, index=False) # Save the final CSV
+        self.df.to_csv(self.output_path, index=False)  # Save the final CSV
         print(f"CSV generated successfully at: {self.output_path}")
         return self
 
@@ -96,10 +96,10 @@ class RawData:
 
 
 downloader = RawData(
-    latitude=11.6231, #  Coordinates of the location (example: Seelanaickenpatti Salem, Tamil Nadu, India)
+    latitude=11.6231,  #  Coordinates of the location (example: Seelanaickenpatti Salem, Tamil Nadu, India)
     longitude=78.1479,
-    start_date="20250701", # Period: jul/2025 to jun/2026
+    start_date="20250701",  # Period: jul/2025 to jun/2026
     end_date="20260630",
-    output_path="data/raw/data_set_raw.csv"
+    output_path="data/raw/data_set_raw.csv",
 )
 downloader.run()
