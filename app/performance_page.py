@@ -40,10 +40,13 @@ class PerformancePage:
     def show_predicted_vs_actual(self):
         """Scatter plot: actual kWh (x) vs predicted kWh (y), with the y = x line."""
         st.subheader("🎯 Predicted vs Actual")
-        fig = px.scatter(
-            self.predictions,
+
+        predictions = self.predictions.sort_values("date")
+
+        fig = px.line(
+            predictions,
             x="actual",
-            y="predicted",
+            y=["actual", "predicted"],
             hover_data=["date"],
             labels={
                 "actual": "Actual energy (kWh)",
@@ -51,20 +54,7 @@ class PerformancePage:
             },
             title="Predicted vs actual energy (test set)",
         )
-        lowest = min(
-            self.predictions["actual"].min(), self.predictions["predicted"].min()
-        )
-        highest = max(
-            self.predictions["actual"].max(), self.predictions["predicted"].max()
-        )
-        fig.add_shape(
-            type="line",
-            x0=lowest,
-            y0=lowest,
-            x1=highest,
-            y1=highest,
-            line={"dash": "dash"},
-        )
+
         st.plotly_chart(fig)
         st.caption(
             "Each dot is one day the model had never seen. If the prediction was perfect, the dot sits "
