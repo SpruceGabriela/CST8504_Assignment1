@@ -1,9 +1,10 @@
-import streamlit as st
+import os
+import sys
+
 import pandas as pd
 import plotly.express as px
-import sys
-import os
 import plotly.graph_objects as go
+import streamlit as st
 
 # ------------------------------------------------------------
 # Ensure Python can find the src/ package
@@ -11,8 +12,8 @@ import plotly.graph_objects as go
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from src.predictor import Predictor
 from src.data_processor import DataProcessor
+from src.predictor import Predictor
 
 
 # ============================================================
@@ -40,6 +41,13 @@ class Dashboard:
             model_path="models/linear_regression.pkl", scaler_path="models/scaler.pkl"
         )
 
+        # Page settings
+        st.set_page_config(
+            page_title="Solar Energy Production Dashboard",
+            page_icon="☀️",
+            layout="wide",
+        )
+
         # Create a mapping between raw column names and readable labels
         self.feature_labels = {
             "date": "Date",
@@ -59,15 +67,29 @@ class Dashboard:
     # PAGE 1 — DATA OVERVIEW
     # ============================================================
     def page_data_overview(self):
+        """Draws the Data Overview page.
+        The dashboard only needs to call this method."""
         st.header("📊 Data Overview")
 
+        self.raw_nasa_overview()
+        self.raw_nasa_preview()
+        self.raw_nasa_stats()
+        self.raw_generation_overview()
+        self.raw_generation_preview()
+        self.train_preview()
+        self.dataset_size()
+
+    def raw_nasa_overview(self):
+        """Explore the Raw Nasa Power data set.
+        - Details about the Dataset
+        """
         st.subheader("🌤️ Raw NASA POWER Dataset Overview")
         st.markdown(
             f"""
         - **Location:** Tamil Nadu, India  
         - **Date Range:** 2025-07-01 → 2026-06-30  
         - **Number of Features:** 8  
-        - **Number of Instances:** **{self.raw.shape[0]}**
+        - **Number of Instances:** {self.raw.shape[0]}
 
         ---
 
@@ -75,8 +97,11 @@ class Dashboard:
         """
         )
 
-        # Raw Nasa Power Data Set visualization with start and stop box
-        col1, col2, col3 = st.columns([1, 1, 7])  # both columns small
+    def raw_nasa_preview(self):
+        """
+        Raw Nasa Power Data Set visualization with start and end row box
+        """
+        col1, col2, _col3 = st.columns([1, 1, 7])  # both columns small
         with col1:
             start = st.number_input(
                 "Start row", min_value=0, max_value=len(self.raw) - 1, value=0
@@ -91,35 +116,47 @@ class Dashboard:
             )
         st.dataframe(self.raw.iloc[start:end])
 
-        # Summary statistics of raw data
+    def raw_nasa_stats(self):
+        """
+        Summary statistis of the raw Nasa Power Dataset
+        """
         st.subheader("Summary Statistics of Raw NASA POWER Data")
 
         # Summary statistics
         raw_summary = self.raw.describe().transpose()
 
-        # Renomear as features usando o dicionário de labels
+        # Rename features using labels dictionary
         raw_summary.index = [
             self.feature_labels.get(col, col) for col in raw_summary.index
         ]
 
-        # Mostrar no dashboard
+        # Show in dashboard
         st.dataframe(raw_summary, use_container_width=True)
 
+    def raw_generation_overview(self):
+        """
+        Explore the Raw Daily Generation data set.
+        - Details about the Dataset
+        """
         st.markdown(
             f"""
-        ### 📍 Raw Daily Generation Dataset Details
+        ### 📍 Raw Daily Generation Dataset Overview
         - **Location:** Tamil Nadu, India  
         - **Date Range:** 2024-11-24 → 2026-09-15
         - **Number of Features:** 4 
-        - **Number of Instances:** **{self.raw2.shape[0]}**
+        - **Number of Instances:** {self.raw2.shape[0]}
         - **System:** 3 photovoltaic solar panels  
         - **Total installed capacity:** 3 kW  
         - **Approximate panel area:** 15 m²  
         """
         )
 
+    def raw_generation_preview(self):
+        """
+        Raw Daily Generation Data Set visualization with start and end row box
+        """
         st.subheader("Raw Daily Generation Data Preview")
-        col11, col12, col13 = st.columns([1, 1, 7])  # both columns small
+        col11, col12, _col13 = st.columns([1, 1, 7])  # both columns small
         with col11:
             start1 = st.number_input(
                 "Start row", min_value=0, max_value=len(self.raw2) - 1, value=0
@@ -134,8 +171,12 @@ class Dashboard:
             )
         st.dataframe(self.raw2.iloc[start1:end1])
 
+    def train_preview(self):
+        """
+        Training Data Set visualization with start and end row box
+        """
         st.subheader("📘 Training Data Preview (Prepared Data)")
-        col111, col112, col113 = st.columns([1, 1, 5])  # both columns small
+        col111, col112, _col113 = st.columns([1, 1, 5])  # both columns small
         with col111:
             start2 = st.number_input(
                 "Start row", min_value=0, max_value=len(self.train) - 1, value=0
@@ -149,6 +190,11 @@ class Dashboard:
                 value=5,
             )
         st.dataframe(self.train.iloc[start2:end2])
+
+    def dataset_size(self):
+        """
+        Describe datasets size.
+        """
 
         st.subheader("📏 Datasets Size:")
         col1, col2, _ = st.columns([2, 2, 3])
@@ -170,15 +216,22 @@ class Dashboard:
     # PAGE 2 — INTERACTIVE EXPLORATION
     # ============================================================
     def page_exploration(self):
+        """Draws the exploration page.
+        The dashboard only needs to call this method."""
         st.header("🔍 Interactive Exploration")
-
-        # --------------------------
-        # MAIN LINE CHART
-        # --------------------------
         st.markdown(
             "Choose the dates and a feature to visualize its behavior on all graphics below."
         )
 
+        self.exploration_options()
+        self.overtime()
+        self.rolling_mean()
+        self.scatter()
+
+    def exploration_options(self):
+        """
+        Builds option selector. Ensures the user selects a date range and a feature, and then displays all charts based on those inputs.
+        """
         # Use RAW dataset
         df = self.raw.copy()
 
@@ -228,61 +281,71 @@ class Dashboard:
         # Find the corresponding raw column name
         feature = [k for k, v in self.feature_labels.items() if v == feature_label][0]
 
-        # --------------------------
-        # FEATURE OVERTIME - LINE CHART
-        # --------------------------
+        # Save for other methods
+        self.df = df
+        self.feature = feature
+        self.feature_label = feature_label
+
+    def overtime(self):
+        """
+        Plot atime-series visualization (Line Chart)
+        """
         st.markdown("### Feature Overtime")
         # Line chart
-        if "date" in df.columns:
+        if "date" in self.df.columns:
             fig = px.line(
-                df,
+                self.df,
                 x="date",
-                y=feature,
-                title=f"{feature_label} Over Time",
+                y=self.feature,
+                title=f"{self.feature_label} Over Time",
                 markers=True,
                 labels={
                     "date": "Date",  # Rename axis X
-                    feature: feature_label,  # Rename axis Y
+                    self.feature: self.feature_label,  # Rename axis Y
                 },
             )
             st.plotly_chart(fig, use_container_width=True)
 
-        # --------------------------
-        # ROLLING MEAN CHART
-        # --------------------------
-        st.subheader("Rolling Mean")
+    def rolling_mean(self):
+        """
+        Plots the rolling mean of the selected feature.
+        Allows the user to choose a rolling window (3–60 days),
+        and visualizes the smoothed trend to highlight medium‑term behavior.
+        """
+        st.subheader("Smoothed Trend (Rolling Mean)")
 
-        window = st.slider(
-            "Select rolling window (days):", min_value=3, max_value=60, value=14
-        )
+        window = st.slider("Select rolling window (days):", 3, 60, 14)
 
-        df["rolling"] = df[feature].rolling(window=window).mean()
+        self.df["rolling"] = self.df[self.feature].rolling(window=window).mean()
 
         fig2 = px.line(
-            df,
+            self.df,
             x="date",
             y="rolling",
-            title=f"{feature_label} - {window}-day Rolling Mean",
+            title=f"{self.feature_label} - {window}-day Rolling Mean",
             markers=False,
-            labels={"date": "Date", "rolling": f"{feature_label} (Rolling Mean)"},
+            labels={"date": "Date", "rolling": f"{self.feature_label} (Rolling Mean)"},
         )
         st.plotly_chart(fig2, use_container_width=True)
 
-        # --------------------------
-        # SCATTER WITH TRENDLINE
-        # --------------------------
-        st.subheader("Scatter with Trendline")
+    def scatter(self):
+        """
+        Shows a scatter plot with a LOWESS trendline.
+        Helps identify patterns, noise, and non‑linear relationships in the selected feature over time.
+        The trendline is styled in red for emphasis.
+        """
+        st.subheader("Feature Trend & Variability")
         fig3 = px.scatter(
-            df,
+            self.df,
             x="date",
-            y=feature,
+            y=self.feature,
             trendline="lowess",
-            title=f"{feature_label} Scatter with Trendline",
-            labels={"date": "Date", feature: feature_label},
+            title=f"{self.feature_label} Scatter with Trendline",
+            labels={"date": "Date", self.feature: self.feature_label},
         )
 
         # Make the trendline red
-        fig3.update_traces(selector=dict(mode="lines"), line=dict(color="red", width=3))
+        fig3.update_traces(selector=dict(mode="lines"), line=dict(color="red", width=2))
 
         st.plotly_chart(fig3, use_container_width=True)
 
@@ -291,8 +354,11 @@ class Dashboard:
     # ============================================================
 
     def page_prediction(self):
+        """
+        Interactive module for predicting daily solar energy output based on model and user inputs.
+        """
 
-        st.header("⚡ Prediction")
+        st.header("⚡ Energy Prediction")
         st.subheader("""
             🎯 Goal
             Predict the **daily solar energy generation** for the specific photovoltaic system located in Tamil Nadu (India).
@@ -300,6 +366,10 @@ class Dashboard:
             Adjust the input features below to generate a prediction:
             """)
 
+        self.user_inputs()
+        self.user_prediction()
+
+    def user_inputs(self):
         # Load RAW dataset (needed for dtypes and default values)
         df_raw = self.raw.copy()
 
@@ -351,17 +421,22 @@ class Dashboard:
         # Convert date to datetime
         input_df["date"] = pd.to_datetime(input_df["date"])
 
+        # Save for other methods
+        self.input_df = input_df
+
+    def user_prediction(self):
+
         # Rename RAW → model columns
-        input_df = self.data_processor.rename_features_df(input_df)
+        self.input_df = self.data_processor.rename_features_df(self.input_df)
 
         # Create derived features (same logic as training)
-        input_df = self.data_processor.create_features_df(input_df)
+        self.input_df = self.data_processor.create_features_df(self.input_df)
 
         # Create seasons (same logic as training)
-        input_df = self.data_processor.encode_season_df(input_df)
+        self.input_df = self.data_processor.encode_season_df(self.input_df)
 
         # Ensure model receives exactly the columns it expects
-        final_df = input_df[self.predictor.model.feature_names_in_]
+        final_df = self.input_df[self.predictor.model.feature_names_in_]
 
         # Predict
         col_btn, col_result, _ = st.columns([1, 2, 11])
@@ -376,9 +451,8 @@ class Dashboard:
 
         # GRAPHIC FOR PREDICT VALUE
         if predict_clicked:
-            max_value = (
-                self.prepared["generated_energy"].max() * 1.5
-            )  # set the max value = data_set_prepared - generated_energy + 50%
+            # set the max value = data_set_prepared - generated_energy + 50%
+            max_value = self.prepared["generated_energy"].max() * 1.5
             _, col_graph, _ = st.columns([1, 2, 11])
 
             with col_graph:
@@ -407,9 +481,11 @@ class Dashboard:
                 )
 
                 st.plotly_chart(figA, use_container_width=True)
+
     # ============================================================
     # PAGE 4 — PERFORMANCE
     # ============================================================
+
     def page_performance(self):
         """Draws the performance page.
         The dashboard only needs to call this method."""
@@ -434,45 +510,38 @@ class Dashboard:
             "(for both, lower is better). R² shows how much of the day-to-day change in energy the model explains "
             "(1 is perfect, 0 is no better than guessing the average). The test row is the final score."
         )
-    
+
     def show_predicted_vs_actual(self):
-        """Scatter plot: actual kWh (x) vs predicted kWh (y), with the y = x line."""
+        """Line chart: actual and predicted kWh for each test day, in date order."""
+
         st.subheader("🎯 Predicted vs Actual")
-        fig = px.scatter(
-            self.predictions,
-            x="actual",
-            y="predicted",
+
+        predictions = self.predictions.sort_values("date")
+
+        fig = px.line(
+            predictions,
+            x="date",
+            y=["actual", "predicted"],
+            markers=True,
             hover_data=["date"],
             labels={
-                "actual": "Actual energy (kWh)",
-                "predicted": "Predicted energy (kWh)",
+                "date": "Date",
+                "value": "Energy (kWh)",
+                "variable": "",
             },
             title="Predicted vs actual energy (test set)",
+            color_discrete_map={"actual": "#1ABC9C", "predicted": "#D2457D"},
         )
-        lowest = min(
-            self.predictions["actual"].min(), self.predictions["predicted"].min()
-        )
-        highest = max(
-            self.predictions["actual"].max(), self.predictions["predicted"].max()
-        )
-        fig.add_shape(
-            type="line",
-            x0=lowest,
-            y0=lowest,
-            x1=highest,
-            y1=highest,
-            line={"dash": "dash"},
-        )
+
         st.plotly_chart(fig)
         st.caption(
-            "Each dot is one day the model had never seen. If the prediction was perfect, the dot sits "
-            "on the dashed line. Dots below the line are days the model expected more energy than the plant "
-            "actually produced."
+            "Turquoise is the real energy and pink is the model's prediction, for days the model never saw. "
+            "The closer the lines, the better. Big gaps are days the plant produced less than expected."
         )
 
     def show_residuals(self):
         """Scatter plot: predicted kWh (x) vs residual (y), with a line at zero."""
-        st.subheader("📉 Residuals")
+        st.subheader("📈 Residuals")
         fig = px.scatter(
             self.predictions,
             x="predicted",
@@ -543,11 +612,11 @@ class Dashboard:
         div[data-testid="stRadio"] {
             position: fixed;
             top: 10px;
-            z-index: 999;
-            background-color: #0e1117;
-            padding: 15px 0px 20px 0px;
-            width: 100%;
-            border-bottom: 1px solid #333;
+            z-index: 99999;
+            background-color: light-dark(#ffffff, #0e1117) !important;
+            padding: 15px 5px 20px 0px;
+            width: 100vw;
+            border-bottom: 1px solid #ccc;
             margin-top: 0.2rem !important;   /* space above the title */
             margin-bottom: 0.5rem !important; /* space below the title */
 
@@ -555,14 +624,17 @@ class Dashboard:
 
         /* Push down the content */
         .main {
-            margin-top: 10px !important;
+            margin-top: 70px !important;
         }
 
         /* Remove lateral spaces */
         .block-container {
+            padding-top: 7.5rem !important;
             padding-left: 2rem !important;
             padding-right: 2rem !important;
         }
+
+
         </style>
         """,
             unsafe_allow_html=True,
