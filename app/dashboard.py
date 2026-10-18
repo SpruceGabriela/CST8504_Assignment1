@@ -1,9 +1,10 @@
-import streamlit as st
+import os
+import sys
+
 import pandas as pd
 import plotly.express as px
-import sys
-import os
 import plotly.graph_objects as go
+import streamlit as st
 
 # ------------------------------------------------------------
 # Ensure Python can find the src/ package
@@ -11,8 +12,8 @@ import plotly.graph_objects as go
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from src.predictor import Predictor
 from src.data_processor import DataProcessor
+from src.predictor import Predictor
 
 
 # ============================================================
@@ -100,7 +101,7 @@ class Dashboard:
         """
         Raw Nasa Power Data Set visualization with start and end row box
         """
-        col1, col2, col3 = st.columns([1, 1, 7])  # both columns small
+        col1, col2, _col3 = st.columns([1, 1, 7])  # both columns small
         with col1:
             start = st.number_input(
                 "Start row", min_value=0, max_value=len(self.raw) - 1, value=0
@@ -155,7 +156,7 @@ class Dashboard:
         Raw Daily Generation Data Set visualization with start and end row box
         """
         st.subheader("Raw Daily Generation Data Preview")
-        col11, col12, col13 = st.columns([1, 1, 7])  # both columns small
+        col11, col12, _col13 = st.columns([1, 1, 7])  # both columns small
         with col11:
             start1 = st.number_input(
                 "Start row", min_value=0, max_value=len(self.raw2) - 1, value=0
@@ -175,7 +176,7 @@ class Dashboard:
         Training Data Set visualization with start and end row box
         """
         st.subheader("📘 Training Data Preview (Prepared Data)")
-        col111, col112, col113 = st.columns([1, 1, 5])  # both columns small
+        col111, col112, _col113 = st.columns([1, 1, 5])  # both columns small
         with col111:
             start2 = st.number_input(
                 "Start row", min_value=0, max_value=len(self.train) - 1, value=0
