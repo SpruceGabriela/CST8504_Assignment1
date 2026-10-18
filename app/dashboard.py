@@ -532,7 +532,7 @@ class Dashboard:
             title="Predicted vs actual energy (test set)",
             color_discrete_map={"actual": "#1ABC9C", "predicted": "#D2457D"},
         )
-
+        fig.update_yaxes(range=[0, 25], dtick=2)
         st.plotly_chart(fig)
         st.caption(
             "Turquoise is the real energy and pink is the model's prediction, for days the model never saw. "
