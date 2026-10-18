@@ -22,7 +22,7 @@ class DataProcessor:
                 "CLRSKY_SFC_SW_DWN": "ghi_clear",
                 "T2M": "temp",
                 "RH2M": "humidity",
-                "WS10M": "wind",
+                "WS2M": "wind",
                 "CLOUD_AMT": "clouds",
                 "PRECTOTCORR": "rain",
             }
@@ -36,7 +36,7 @@ class DataProcessor:
                 "CLRSKY_SFC_SW_DWN": "ghi_clear",
                 "T2M": "temp",
                 "RH2M": "humidity",
-                "WS10M": "wind",
+                "WS2M": "wind",
                 "CLOUD_AMT": "clouds",
                 "PRECTOTCORR": "rain",
             }
