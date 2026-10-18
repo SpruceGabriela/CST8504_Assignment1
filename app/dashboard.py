@@ -55,7 +55,7 @@ class Dashboard:
             "CLRSKY_SFC_SW_DWN": "GHI Clear Sky - (W/m²)",
             "T2M": "Temperature (C)",
             "RH2M": "Humidity (%)",
-            "WS10M": "Wind (m/s)",
+            "WS2M": "Wind (m/s)",
             "CLOUD_AMT": "Cloud (%)",
             "PRECTOTCORR": "Precipitation Corrected (mm/day)",
         }

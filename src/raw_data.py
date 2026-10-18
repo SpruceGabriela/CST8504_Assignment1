@@ -19,7 +19,7 @@ class RawData:
             "CLRSKY_SFC_SW_DWN",  # Clear-sky GHI
             "T2M",  # Air temperature
             "RH2M",  # Relative humidity
-            "WS10M",  # Wind speed
+            "WS2M",  # Wind speed
             "CLOUD_AMT",  # Clouds
             "PRECTOTCORR",  # Total precipitation
         ]
