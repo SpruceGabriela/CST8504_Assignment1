@@ -96,7 +96,7 @@ class RawData:
 
 
 downloader = RawData(
-    latitude=11.6231,  #  Coordinates of the location (example: Seelanaickenpatti Salem, Tamil Nadu, India)
+    latitude=11.6231,  #  Coordinates of the location (example: Salem, Tamil Nadu, India)
     longitude=78.1479,
     start_date="20250701",  # Period: jul/2025 to jun/2026
     end_date="20260630",

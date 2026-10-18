@@ -86,7 +86,7 @@ class Dashboard:
         st.subheader("🌤️ Raw NASA POWER Dataset Overview")
         st.markdown(
             f"""
-        - **Location:** Tamil Nadu, India  
+        - **Location:** Salem, Tamil Nadu, India  
         - **Date Range:** 2025-07-01 → 2026-06-30  
         - **Number of Features:** 8  
         - **Number of Instances:** {self.raw.shape[0]}
@@ -141,7 +141,7 @@ class Dashboard:
         st.markdown(
             f"""
         ### 📍 Raw Daily Generation Dataset Overview
-        - **Location:** Tamil Nadu, India  
+        - **Location:** Salem, Tamil Nadu, India  
         - **Date Range:** 2024-11-24 → 2026-09-15
         - **Number of Features:** 4 
         - **Number of Instances:** {self.raw2.shape[0]}
@@ -361,7 +361,7 @@ class Dashboard:
         st.header("⚡ Energy Prediction")
         st.subheader("""
             🎯 Goal
-            Predict the **daily solar energy generation** for the specific photovoltaic system located in Tamil Nadu (India).
+            Predict the **daily solar energy generation** for the specific photovoltaic system located in Salem, Tamil Nadu, India.
 
             Adjust the input features below to generate a prediction:
             """)
