@@ -553,7 +553,8 @@ class Dashboard:
             },
             title="Residuals (test set)",
         )
-        fig.add_hline(y=0, line_dash="dash")
+        fig.update_traces(marker_color="#D2457D")
+        fig.add_hline(y=0, line_dash="dash", line_color="#1ABC9C")
         st.plotly_chart(fig)
         st.caption(
             "A residual is the miss for one day (actual minus predicted). Dots scattered evenly around the dashed "
@@ -594,6 +595,18 @@ class Dashboard:
             "The 5 days where the model overestimated the most. On these days there was plenty of sun, but the "
             "plant produced almost nothing, which suggests it was offline. No weather data can predict that, so "
             "these errors come from the data, not from the model."
+        )
+
+    # FOOTER
+    # ============================================================
+    def footer(self):
+        """Shows the authors at the bottom of every page."""
+        st.divider()
+        st.markdown(
+            "<p style='text-align: center; color: gray; font-size: 0.85rem;'>"
+            "Gabriela Pinheiro & Daniele Ramos · CST8504 Applying AI Techniques · Algonquin College"
+            "</p>",
+            unsafe_allow_html=True,
         )
 
     # ============================================================
@@ -663,6 +676,7 @@ class Dashboard:
             self.page_prediction()
         elif menu == "📉 Model Performance":
             self.page_performance()
+        self.footer()
 
 
 # ============================================================
