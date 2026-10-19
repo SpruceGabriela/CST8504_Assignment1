@@ -2,6 +2,9 @@ import pytest
 
 from src.predictor import Predictor
 
+# I already knew testing concepts, but pytest was new to me. The tests follow the steps from this article:
+# https://medium.com/@bressan/software-engineering-for-data-scientists-testing-ml-models-with-pytest-d28b83ab54d9
+
 # Fake day fro the test cases
 MOCK_DAY = {
     "ghi": 5.5,
