@@ -3,7 +3,8 @@ import pytest
 
 from src.model_trainer import ModelTrainer
 
-# I already knew the concept of testing, but for python was new, I learned reading a Medium article, following the steps
+# I already knew testing concepts, but pytest was new to me. The tests follow the steps from this article:
+# https://medium.com/@bressan/software-engineering-for-data-scientists-testing-ml-models-with-pytest-d28b83ab54d9
 
 # Fake dataset to use in the test cases
 MOCK_DAYS = pd.DataFrame(

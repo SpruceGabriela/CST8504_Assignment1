@@ -15,6 +15,7 @@ NON_FEATURE_COLUMNS = [
 ]
 
 
+# Logic and order of events done with help from AI assistant - Claude
 class ModelTrainer:
     def __init__(self, data_dir="data/processed", models_dir="models"):
         self.data_dir = data_dir
